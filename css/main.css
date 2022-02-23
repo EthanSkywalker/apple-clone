@@ -1,0 +1,230 @@
+@charset 'utf-8';
+
+html {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size  : 14px;
+}
+
+body {
+    /*가로 스크롤 제거*/
+    overflow-x    : hidden;
+    color         : rgb(29, 29, 31);
+    /*자간 줄이기*/
+    letter-spacing: -0.05em;
+    background    : white;
+}
+
+p {
+    line-height: 1.6;
+    /*문단*/
+}
+
+a {
+    color          : rgb(29, 29, 31);
+    text-decoration: none;
+}
+
+.global-nav {
+    position: absolute;
+    top     : 0;
+    left    : 0;
+    width   : 100%;
+    height  : 44px;
+    padding : 0 1rem;
+}
+
+.local-nav {
+    position     : absolute;
+    top          : 45px;
+    left         : 0;
+    width        : 100%;
+    height       : 52px;
+    border-bottom: 1px solid #ddd;
+    padding      : 0 1rem;
+}
+
+.global-nav-link,
+.local-nav-links {
+    display        : flex;
+    justify-content: space-between;
+    align-items    : center;
+    max-width      : 1000px;
+    height         : 100%;
+    margin         : 0 auto;
+}
+
+.local-nav-links {
+    justify-content: space-between;
+}
+
+.local-nav-links .product-name {
+    margin-right: auto;
+    font-size   : 1.4rem;
+    font-weight : bold;
+}
+
+.local-nav-links a {
+    font-size: 0.8rem;
+}
+
+/* not 은 () 안에 해당하는 것을 제외하고 적용한다. */
+.local-nav-links a:not(.product-name) {
+    margin-left: 2em;
+}
+
+
+/* section  Start*/
+.scroll-section {
+    /* 브라우저 크기(현재 창 크기)의 반 만큼 패딩 부여 */
+    padding-top: 50vh;
+    border     : 3px solid red;
+}
+
+#scroll-section-0 h1 {
+    font-size : 4rem;
+    text-align: center;
+}
+
+.main-message {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    top            : 35vh;
+    margin         : 5px 0;
+    height         : 3em;
+    font-size      : 2.5rem;
+    opacity        : 0;
+}
+
+.main-message p {
+    font-weight: bold;
+    text-align : center;
+    line-height: 1.2;
+}
+
+/* main message 의 small 에만 적용 */
+.main-message small {
+    display      : block;
+    margin-bottom: 0.5em;
+    font-size    : 1.2rem;
+}
+
+
+/* id scroll-section-2 의 main-message 의 값  */
+#scroll-section-2 .main-message {
+    font-size: 3.5rem;
+}
+
+.description {
+    max-width: 1000px;
+    margin   : 0 auto;
+    padding  : 0 1rem;
+    font-size: 1.2rem;
+    color    : #888;
+
+}
+
+.description strong {
+    float       : left;
+    margin-right: 0.2em;
+    font-size   : 3rem;
+    color       : rgb(29, 29, 31);
+}
+
+.desc-message {
+    width      : 50%;
+    font-weight: bold;
+}
+
+.pin {
+    width           : 1px;
+    height          : 100px;
+    background-color: rgb(29, 29, 31);
+    ;
+}
+
+.mid-message {
+    max-width: 1000px;
+    margin   : 0 auto;
+    padding  : 0 1rem;
+    font-size: 2rem;
+    color    : #888;
+}
+
+.mid-message strong {
+    color: rgb(29, 29, 31);
+}
+
+.canvas-caption {
+    max-width: 1000px;
+    margin   : 0 auto;
+    padding  : 0 1rem;
+    font-size: 1.2rem;
+    color    : #888;
+}
+
+.footer {
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+    height         : 7rem;
+    color          : white;
+    background     : darkorange;
+}
+
+/* fixed 가 body 의 show-scene 값이 특정 값이기 전에는 none 으로 보이지 않음. */
+.sticky-elem {
+    display : none;
+    position: fixed;
+    left    : 0;
+    width   : 100%;
+}
+
+/* body 의 id show-scene 값이 특정 값일 때만 변경 되면 display block 으로 보여준다. */
+/* 즉 body 의 id 값이 변경되서 특정 값 일때만 block 이고 그 외 일때에는 none 으로 보이지 않는다. */
+#show-scene-0 #scroll-section-0 .sticky-elem,
+#show-scene-1 #scroll-section-1 .sticky-elem,
+#show-scene-2 #scroll-section-2 .sticky-elem,
+#show-scene-3 #scroll-section-3 .sticky-elem {
+    display: block;
+}
+
+
+@media (min-width : 1024px) {
+    #scroll-section-0 h1 {
+        font-size: 9vw;
+    }
+
+    .main-message {
+        font-size: 4vw;
+    }
+
+    .description {
+        font-size: 2rem;
+    }
+
+    .description strong {
+        font-size: 6rem;
+    }
+
+    #scroll-section-2 .main-message {
+        font-size: 6vw;
+    }
+
+    .main-message small {
+        font-size: 1.5vw;
+    }
+
+    .desc-message {
+        width      : 20%;
+        font-weight: bold;
+    }
+
+    .mid-message {
+        font-size: 4vw;
+    }
+
+    .canvas-caption {
+        font-size: 2rem;
+    }
+}
