@@ -4,6 +4,9 @@
 // 3.1 - prevScrollHeight는 이전 Scene 의 높이 값을 가지고 있는데, 현재 Scene 의 높이를 현재 스크롤 위치로 계산하여 Index를 변경하며 Scene을 파악 
 // 4 - Scene 에서의 스크롤 위치를 알 수 있는 메소드를 생성한다. (playAnimation 확인)
 // 5 - Scene 애서의 스크롤 범위를 알 수 있는 (0~1) 메소드를 생성한다. (calcValues)
+// 6 - calcValues 를 통히여 opacity 와 translate 값 등을 변경한다.
+// 7 - html에 canavs 를 그린 후 setCanvasImages 에서 이미를 셋팅한다.
+
 
 (() => {
 
@@ -25,9 +28,15 @@
                 messageA: document.querySelector('#scroll-section-0 .main-message.a'),
                 messageB: document.querySelector('#scroll-section-0 .main-message.b'),
                 messageC: document.querySelector('#scroll-section-0 .main-message.c'),
-                messageD: document.querySelector('#scroll-section-0 .main-message.d')
+                messageD: document.querySelector('#scroll-section-0 .main-message.d'),
+                canvas: document.querySelector('#video-canvas-0'),
+                context: document.querySelector('#video-canvas-0').getContext('2d'),
+                videoImages: []
             },
             values: {
+                videoImageCount: 300,						                    // 이미지 갯수
+                imageSequence: [0, 299],					                    // 이미지 순서의 초기 값과 최종 값
+                canvas_opacity: [1, 0, { start: 0.9, end: 1 }],
                 messageA_opacity_in: [0, 1, { start: 0.1, end: 0.2 }],
                 messageB_opacity_in: [0, 1, { start: 0.3, end: 0.4 }],
                 messageC_opacity_in: [0, 1, { start: 0.5, end: 0.6 }],
@@ -67,9 +76,16 @@
                 messageB: document.querySelector('#scroll-section-2 .b'),
                 messageC: document.querySelector('#scroll-section-2 .c'),
                 pinB: document.querySelector('#scroll-section-2 .b .pin'),
-                pinC: document.querySelector('#scroll-section-2 .c .pin')
+                pinC: document.querySelector('#scroll-section-2 .c .pin'),
+                canvas: document.querySelector('#video-canvas-1'),
+                context: document.querySelector('#video-canvas-1').getContext('2d'),
+                videoImages: []
             },
             values: {
+                videoImageCount: 960,						                    // 이미지 갯수
+                imageSequence: [0, 959],					                    // 이미지 순서의 초기 값과 최종 값
+                canvas_opacity_in: [0, 1, { start: 0, end: 0.1 }],
+                canvas_opacity_out: [1, 0, { start: 0.95, end: 1 }],
                 messageA_translateY_in: [20, 0, { start: 0.15, end: 0.2 }],
                 messageB_translateY_in: [30, 0, { start: 0.5, end: 0.55 }],
                 messageC_translateY_in: [30, 0, { start: 0.72, end: 0.77 }],
@@ -105,6 +121,24 @@
         }
     ];
 
+    // 이미지를 배열에 셋팅하는 함수
+    function setCanvasImages() {
+        let imgElem;
+        for (let i = 0; i < sceneInfo[0].values.videoImageCount; i++) {
+            imgElem = new Image();
+            imgElem.src = `./video/001/IMG_${6726 + i}.JPG`;
+            sceneInfo[0].objs.videoImages.push(imgElem);
+        }
+
+        let imgElem2;
+        for (let i = 0; i < sceneInfo[2].values.videoImageCount; i++) {
+            imgElem2 = new Image();
+            imgElem2.src = `./video/002/IMG_${7027 + i}.JPG`;
+            sceneInfo[2].objs.videoImages.push(imgElem2);
+        }
+    }
+    setCanvasImages();
+
 
     // 각 스크롤 Section 높이를 세팅
     function setLayout() {
@@ -130,6 +164,10 @@
             }
         }
         document.body.setAttribute('id', `show-scene-${currentScene}`);
+
+        const heightRatio = window.innerHeight / 1080;
+        sceneInfo[0].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`           // canvas scale 을 통한 중앙 정렬. css 파일도 참고 필요 
+        sceneInfo[2].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`
     }
 
 
@@ -188,7 +226,12 @@
 
         switch (currentScene) {
             case 0:
-                // console.log('0 play');
+                let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
+                objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                objs.canvas.style.opacity = calcValues(values.canvas_opacity, currentYOffset);
+
+
+
                 // translate3d 는 하드웨어 가속이 보장됨. 퍼포먼스가 더 좋다. 
                 if (scrollRatio <= 0.22) {
                     // in
@@ -239,6 +282,17 @@
 
             case 2:
                 // console.log('2 play');
+                let sequence2 = Math.round(calcValues(values.imageSequence, currentYOffset));
+                objs.context.drawImage(objs.videoImages[sequence2], 0, 0);
+
+                if (scrollRatio <= 0.5) {
+                    // in
+                    objs.canvas.style.opacity = calcValues(values.canvas_opacity_in, currentYOffset);
+                } else {
+                    // out
+                    objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currentYOffset);
+                }
+
                 if (scrollRatio <= 0.25) {
                     // in
                     objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currentYOffset);
@@ -319,8 +373,14 @@
         scrollLoop();
     })
 
-    window.addEventListener('resize', setLayout)                                            // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
-    window.addEventListener('load', setLayout)                                              // 이미지 리소스 까지 다 받은 후 작동
+    window.addEventListener('resize', () => {                                               // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
+        setLayout();
+    })
+
+    window.addEventListener('load', () => {
+        setLayout();                                                                        // 이미지 리소스 까지 다 받은 후 작동
+        sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);        // 문서를 처음 호출했을 때 바로 canvas에 이미지가 셋팅 되도록
+    })
 
     setLayout();
 })();
