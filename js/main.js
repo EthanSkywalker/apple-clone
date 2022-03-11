@@ -130,7 +130,7 @@
                 canvas_scale: [0, 0, { start: 0, end: 0 }],
                 canvasCaption_opacity: [0, 1, { start: 0, end: 0 }],
                 canvasCaption_trancelateY: [20, 0, { start: 0, end: 0 }],
-                rectStartY: 0,
+                rectStartY: 0,                                              // Canvas 에니메이션이 시작되는 시점의 Y 값
             }
         }
     ];
@@ -161,9 +161,9 @@
     setCanvasImages();
 
     function checkMenu() {
-        if (yOffset > 44){
+        if (yOffset > 44) {
             document.body.classList.add('local-nav-sticky')
-        }else{
+        } else {
             document.body.classList.remove('local-nav-sticky')
         }
     }
@@ -387,28 +387,22 @@
 
                     const whiteRectWidth = recalculatedInnerWidth * 0.15;                           // 흰색 박스 크기 
 
-                    values.rect1X[0] = (objs.canvas.width - recalculatedInnerWidth) / 2;            // 전체 canvas 크기에서 화면에서 보여주는 canvas 크기 만큼 뺀 다음 2로 나누면 양쪽 크기가 나온다.
-                    values.rect1X[1] = values.rect1X[0] - whiteRectWidth;                           // 왼쪽 흰색 박스가 밀려나는 위치 (왼쪽 방향으로)
-                    values.rect2X[0] = values.rect1X[0] + recalculatedInnerWidth - whiteRectWidth;  // 오른쪽 박스가 시작 되는 위치 (모니터에 보여지는 canvas 의 내부크기 - 흰색박스) 
-                    values.rect2X[1] = values.rect2X[0] + whiteRectWidth;                           // 오른쪽 박스가 밀려나는 위치 (오른쪽 방향으로)
+                    // 왼쪽 시작위치 = 원래 canvas 크기에서(1080px) - 새로계산된 canvas 크기 / 2
+                    values.rect1X[0] = (objs.canvas.width - recalculatedInnerWidth) / 2;
+
+                    // 왼쪽 밀려나야할 위치 = 왼쪽 시작위치 - 흰색 박스 크기
+                    values.rect1X[1] = values.rect1X[0] - whiteRectWidth;
+
+                    // 오른쪽 시작 위치 = 왼쪽 시작위치 + 새로계산된 canvas 크기 - 흰색 박스 크기
+                    values.rect2X[0] = values.rect1X[0] + recalculatedInnerWidth - whiteRectWidth;
+
+                    // 오른쪽 밀려나야할 위치 = 오른쪽 시작 위치 + 흰색 박스크기
+                    values.rect2X[1] = values.rect2X[0] + whiteRectWidth;
+
 
                     // 좌우 흰색 박스 그리기
-                    // objs.context.fillRect(values.rect1X[0], 0, parseInt(whiteRectWidth), recalculatedInnerWidth);
-                    // objs.context.fillRect(values.rect2X[0], 0, parseInt(whiteRectWidth), recalculatedInnerWidth);
-
-                    // 좌우 흰색 박스 그리기
-                    objs.context.fillRect(
-                        parseInt(values.rect1X),
-                        0,
-                        parseInt(whiteRectWidth),
-                        objs.canvas.height
-                    );
-                    objs.context.fillRect(
-                        parseInt(values.rect2X),
-                        0,
-                        parseInt(whiteRectWidth),
-                        objs.canvas.height
-                    );
+                    objs.context.fillRect(parseInt(values.rect1X), 0, parseInt(whiteRectWidth), objs.canvas.height);
+                    objs.context.fillRect(parseInt(values.rect2X), 0, parseInt(whiteRectWidth), objs.canvas.height);
                 }
 
                 break;
@@ -434,6 +428,7 @@
                     canvasScaleRatio = widthRatio;
                 }
 
+                // canvas 를 화면 비율에 맞게 scale 조정
                 objs.canvas.style.transform = `scale(${canvasScaleRatio})`
                 objs.context.fillStyle = 'white'
                 objs.context.drawImage(objs.images[0], 0, 0);
@@ -466,11 +461,7 @@
                 values.rect2X[0] = values.rect1X[0] + recalculatedInnerWidth - whiteRectWidth;  // 오른쪽 박스가 시작 되는 위치 (모니터에 보여지는 canvas 의 내부크기 - 흰색박스) 
                 values.rect2X[1] = values.rect2X[0] + whiteRectWidth;                           // 오른쪽 박스가 밀려나는 위치 (오른쪽 방향으로)
 
-                // 좌우 흰색 박스 그리기
-                // objs.context.fillRect(values.rect1X[0], 0, parseInt(whiteRectWidth), recalculatedInnerWidth);
-                // objs.context.fillRect(values.rect2X[0], 0, parseInt(whiteRectWidth), recalculatedInnerWidth);
-
-                // 좌우 흰색 박스 그리기
+                // 스크롤 할 때 좌우 흰색 박스 그리기
                 objs.context.fillRect(
                     parseInt(calcValues(values.rect1X, currentYOffset)),
                     0,
