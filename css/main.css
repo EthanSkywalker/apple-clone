@@ -45,6 +45,13 @@ a {
     border-bottom: 1px solid #ddd;
 }
 
+.local-nav-sticky .local-nav {
+    position       : fixed;
+    top            : 0;
+    background     : rgba(255, 255, 255, 0.1);
+    backdrop-filter: saturate(180%) blur(15px);
+}
+
 .global-nav-link,
 .local-nav-links {
     display        : flex;
@@ -239,6 +246,7 @@ a {
     }
 
     .description {
+        padding  : 0;
         font-size: 2rem;
     }
 
@@ -269,10 +277,13 @@ a {
     }
 
     .mid-message {
+        padding  : 0;
+        width    : 1000px;
         font-size: 4vw;
     }
 
     .canvas-caption {
+        padding  : 0;
         font-size: 2rem;
     }
 }

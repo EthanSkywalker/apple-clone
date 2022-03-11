@@ -6,7 +6,8 @@
 // 5 - Scene 애서의 스크롤 범위를 알 수 있는 (0~1) 메소드를 생성한다. (calcValues)
 // 6 - calcValues 를 통히여 opacity 와 translate 값 등을 변경한다.
 // 7 - html에 canavs 를 그린 후 setCanvasImages 에서 이미지를 셋팅한다.
-// 8 - 
+// 8 - 3번 section 의 canvas를 그린다
+// 8.1 - canvas 의 가로, 세로의 비율을 구한뒤 비율에 맞게 scale 을 조정한다.
 
 (() => {
 
@@ -159,6 +160,13 @@
     }
     setCanvasImages();
 
+    function checkMenu() {
+        if (yOffset > 44){
+            document.body.classList.add('local-nav-sticky')
+        }else{
+            document.body.classList.remove('local-nav-sticky')
+        }
+    }
 
     // 각 스크롤 Section 높이를 세팅
     function setLayout() {
@@ -410,6 +418,7 @@
                 let step = 0;
 
                 // 가로 세로 모두 꽉 차게 하기 위해 여기서 세팅(계산 필요)
+                // 가로와 세로의 브라우저 비율을 구하기 위한 부분
                 const widthRatio = window.innerWidth / objs.canvas.width;
                 const heightRatio = window.innerHeight / objs.canvas.height;
                 let canvasScaleRatio;
@@ -482,21 +491,23 @@
                 } else {
                     step = 2;
                     // 이미지 블렌드
+
                     values.blendHeight[0] = 0;
                     values.blendHeight[1] = objs.canvas.height;
                     values.blendHeight[2].start = values.rect1X[2].end;
-                    values.blendHeight[2].end = values.rect1X[2].start + 0.2;
+                    values.blendHeight[2].end = values.blendHeight[2].start + 0.2;
                     const blendHeight = calcValues(values.blendHeight, currentYOffset);
-
 
                     // 2번 이미지
                     objs.context.drawImage(objs.images[1],
                         //  source setting
                         0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight,
-
                         // canvas setting
                         0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight
                     );
+
+                    objs.canvas.classList.add('sticky');
+                    objs.canvas.style.top = `${-(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
 
 
                     objs.canvas.classList.add('sticky');
@@ -506,18 +517,26 @@
                     if (scrollRatio > values.blendHeight[2].end) {
                         values.canvas_scale[0] = canvasScaleRatio;
                         values.canvas_scale[1] = document.body.offsetWidth / (1.5 * objs.canvas.width);
-
                         values.canvas_scale[2].start = values.blendHeight[2].end;
                         values.canvas_scale[2].end = values.canvas_scale[2].start + 0.2;
 
-                        objs.canvas.style.transform = `scale(${calcValues(values.canvas_scale, currentYOffset)})`
-                        objs.canvas.style.marginTop = 0
-
+                        objs.canvas.style.transform = `scale(${calcValues(values.canvas_scale, currentYOffset)})`;
+                        objs.canvas.style.marginTop = 0;
                     }
 
-                    if (scrollRatio > values.canvas_scale[2].end && values.canvas_scale[2].end > 0) {
+                    if (scrollRatio > values.canvas_scale[2].end
+                        && values.canvas_scale[2].end > 0) {
                         objs.canvas.classList.remove('sticky');
-                        objs.canvas.style.marginTop = `${scrollHeight * 0.4}px`
+                        objs.canvas.style.marginTop = `${scrollHeight * 0.4}px`;
+
+                        values.canvasCaption_opacity[2].start = values.canvas_scale[2].end;
+                        values.canvasCaption_opacity[2].end = values.canvasCaption_opacity[2].start + 0.1;
+                        values.canvasCaption_translateY[2].start = values.canvasCaption_opacity[2].start;
+                        values.canvasCaption_translateY[2].end = values.canvasCaption_opacity[2].end;
+                        objs.canvasCaption.style.opacity = calcValues(values.canvasCaption_opacity, currentYOffset);
+                        objs.canvasCaption.style.transform = `translate3d(0, ${calcValues(values.canvasCaption_translateY, currentYOffset)}%, 0)`;
+                    } else {
+                        objs.canvasCaption.style.opacity = values.canvasCaption_opacity[0];
                     }
                 }
 
@@ -561,6 +580,7 @@
     window.addEventListener('scroll', () => {
         yOffset = window.pageYOffset                                                        // 현재 스크롤 한 위치를 알 수 있다.
         scrollLoop();
+        checkMenu();
     })
 
     window.addEventListener('resize', () => {                                               // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
