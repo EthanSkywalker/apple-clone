@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
 		body {
 			height: 500vh;
 		}
+
 		.box {
 			position: fixed;
 			top: 100px;
@@ -18,13 +20,14 @@
 		}
 	</style>
 </head>
+
 <body>
 	<div class="box"></div>
 
 	<script>
 		const box = document.querySelector('.box');
 		let acc = 0.1;
-		let delayedYOffset = 0;
+		let delayedYOffset = 0;	// 스크롤의 Y 위치
 		let rafId;
 		let rafState;
 
@@ -37,6 +40,9 @@
 		});
 
 		function loop() {
+			// 현재지점 + (목표지점 - 현재지점) x 0.1
+				console.log(pageYOffset, delayedYOffset)
+
 			delayedYOffset = delayedYOffset + (pageYOffset - delayedYOffset) * acc;
 			box.style.width = `${delayedYOffset}px`;
 			console.log('loop');
@@ -52,4 +58,5 @@
 		loop();
 	</script>
 </body>
+
 </html>
