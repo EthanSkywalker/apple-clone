@@ -16,6 +16,11 @@
     let currentScene = 0;                                   // 현재 활성화 된(눈 앞에 보고 있는) 씬 (scroll-section) index
     let enterNewScene = false;                              // 새로운 Scene 이 시작 된 순간
 
+    let acc = 0.1;
+    let delayedYOffset = 0;	// 스크롤의 Y 위치
+    let rafId;
+    let rafState;
+
 
     // 신 정보 배열 생성
     const sceneInfo = [
@@ -129,7 +134,7 @@
                 blendHeight: [0, 0, { start: 0, end: 0 }],
                 canvas_scale: [0, 0, { start: 0, end: 0 }],
                 canvasCaption_opacity: [0, 1, { start: 0, end: 0 }],
-                canvasCaption_trancelateY: [20, 0, { start: 0, end: 0 }],
+                canvasCaption_translateY: [20, 0, { start: 0, end: 0 }],
                 rectStartY: 0,                                              // Canvas 에니메이션이 시작되는 시점의 Y 값
             }
         }
@@ -158,7 +163,6 @@
             sceneInfo[3].objs.images.push(imgElem3);
         }
     }
-    setCanvasImages();
 
     function checkMenu() {
         if (yOffset > 44) {
@@ -256,8 +260,8 @@
 
         switch (currentScene) {
             case 0:
-                let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
-                objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                // let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
+                // objs.context.drawImage(objs.videoImages[sequence], 0, 0);
                 objs.canvas.style.opacity = calcValues(values.canvas_opacity, currentYOffset);
 
 
@@ -312,8 +316,8 @@
 
             case 2:
                 // console.log('2 play');
-                let sequence2 = Math.round(calcValues(values.imageSequence, currentYOffset));
-                objs.context.drawImage(objs.videoImages[sequence2], 0, 0);
+                // let sequence2 = Math.round(calcValues(values.imageSequence, currentYOffset));
+                // objs.context.drawImage(objs.videoImages[sequence2], 0, 0);
 
                 if (scrollRatio <= 0.5) {
                     // in
@@ -547,14 +551,14 @@
 
         // Scene 변경 조건문 Start
         // 이전 스크롤 높이보다 현재 스크롤 높이가 크면 Scene Index + 1
-        if (yOffset > prevScrollHeight + sceneInfo[currentScene].scrollHeight) {
+        if (delayedYOffset > prevScrollHeight + sceneInfo[currentScene].scrollHeight) {
             enterNewScene = true
             currentScene++;
             document.body.setAttribute('id', `show-scene-${currentScene}`);
         }
 
         // 이전 스크롤 높이보다 현재 스크롤 높이가 작으면 Scene Index - 1
-        if (yOffset < prevScrollHeight) {
+        if (delayedYOffset < prevScrollHeight) {
             enterNewScene = true
             if (currentScene === 0) return 0;                                               // 브라우저 바운스 효과로 인해 마이너스가 되는 것을 방지(모바일 및 여러 브라우저 대응)
             currentScene--;
@@ -562,26 +566,69 @@
         }
 
 
+        // Scene 이 변경되는 순간에는 계산 오차로 인해 실행하지 않고 패스
         if (enterNewScene) return;
         playAnimation();
     }
 
+    function loop() {
+        // 현재지점 + (목표지점 - 현재지점) x 0.1 (가속도 적용)
+        delayedYOffset = delayedYOffset + (yOffset - delayedYOffset) * acc;
+
+
+        // Scene 이 변경되는 순간에는 계산 오차로 인해 실행하지 않고 패스
+        if (!enterNewScene) {
+            // Scene 이 1번일 경우
+            if (currentScene === 0 || currentScene === 2) {
+                const currentYOffset = delayedYOffset - prevScrollHeight;
+                const objs = sceneInfo[currentScene].objs;
+                const values = sceneInfo[currentScene].values;
+
+                let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
+                if (objs.videoImages[sequence]) {
+                    objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                }
+            }
+        }
+
+        rafId = requestAnimationFrame(loop);
+
+        if (Math.abs(yOffset - delayedYOffset) < 1) {
+            cancelAnimationFrame(rafId);
+            rafState = false;
+        }
+    }
 
 
     window.addEventListener('scroll', () => {
         yOffset = window.pageYOffset                                                        // 현재 스크롤 한 위치를 알 수 있다.
         scrollLoop();
         checkMenu();
+
+        if (!rafState) {
+            rafId = requestAnimationFrame(loop);
+            rafState = true;
+        }
     })
 
-    window.addEventListener('resize', () => {                                               // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
-        setLayout();
-    })
+
 
     window.addEventListener('load', () => {
         setLayout();                                                                        // 이미지 리소스 까지 다 받은 후 작동
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);        // 문서를 처음 호출했을 때 바로 canvas에 이미지가 셋팅 되도록
     })
 
-    setLayout();
+    window.addEventListener('resize', () => {
+        if (windiw.innerWidth > 600) {
+            // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
+            setLayout();
+        }
+        // 4번 Scnce 의 위치를 시작위치를 초기화 해줌으로써 계산되는 것을 초기화 해준다.
+        // 왜냐하면 rectStartY 와 연관된 계산이 많으므로
+        sceneInfo[3].values.rectStartY = 0;
+    })
+
+    window.addEventListener('orientationChange', setLayout());
+
+    setCanvasImages();
 })();
