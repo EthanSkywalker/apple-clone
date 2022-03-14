@@ -614,6 +614,7 @@
 
 
     window.addEventListener('load', () => {
+        document.body.classList.remove('before-load');
         setLayout();                                                                        // 이미지 리소스 까지 다 받은 후 작동
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);        // 문서를 처음 호출했을 때 바로 canvas에 이미지가 셋팅 되도록
     })
@@ -629,6 +630,11 @@
     })
 
     window.addEventListener('orientationChange', setLayout());
+
+    // transition 이 끝나고 난 후 class 삭제
+    document.querySelector('.loading').addEventListener('transitionend', (e) =>{
+        document.body.removeChild(e.currentTarget)
+    })
 
     setCanvasImages();
 })();
