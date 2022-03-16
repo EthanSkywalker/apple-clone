@@ -600,41 +600,48 @@
     }
 
 
-    window.addEventListener('scroll', () => {
-        yOffset = window.pageYOffset                                                        // 현재 스크롤 한 위치를 알 수 있다.
-        scrollLoop();
-        checkMenu();
-
-        if (!rafState) {
-            rafId = requestAnimationFrame(loop);
-            rafState = true;
-        }
-    })
 
 
 
     window.addEventListener('load', () => {
+
+        
+
         document.body.classList.remove('before-load');
         setLayout();                                                                        // 이미지 리소스 까지 다 받은 후 작동
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);        // 문서를 처음 호출했을 때 바로 canvas에 이미지가 셋팅 되도록
+
+        window.addEventListener('scroll', () => {
+            yOffset = window.pageYOffset                                                        // 현재 스크롤 한 위치를 알 수 있다.
+            scrollLoop();
+            checkMenu();
+
+            if (!rafState) {
+                rafId = requestAnimationFrame(loop);
+                rafState = true;
+            }
+        })
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) {
+                // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
+                setLayout();
+
+                // 4번 Scnce 의 위치를 시작위치를 초기화 해줌으로써 계산되는 것을 초기화 해준다.
+                // 왜냐하면 rectStartY 와 연관된 계산이 많으므로
+                sceneInfo[3].values.rectStartY = 0;
+            }
+
+        })
+
+        window.addEventListener('orientationChange', () => {
+            setTimeout(setLayout, 500);
+        });
+
+        // transition 이 끝나고 난 후 class 삭제
+        document.querySelector('.loading').addEventListener('transitionend', (e) => {
+            document.body.removeChild(e.currentTarget)
+        })
     })
-
-    window.addEventListener('resize', () => {
-        if (windiw.innerWidth > 600) {
-            // resize 이벤트가 발생하면 높이를 유연하게 변경하기 위한 메소드.
-            setLayout();
-        }
-        // 4번 Scnce 의 위치를 시작위치를 초기화 해줌으로써 계산되는 것을 초기화 해준다.
-        // 왜냐하면 rectStartY 와 연관된 계산이 많으므로
-        sceneInfo[3].values.rectStartY = 0;
-    })
-
-    window.addEventListener('orientationChange', setLayout());
-
-    // transition 이 끝나고 난 후 class 삭제
-    document.querySelector('.loading').addEventListener('transitionend', (e) =>{
-        document.body.removeChild(e.currentTarget)
-    })
-
     setCanvasImages();
 })();
